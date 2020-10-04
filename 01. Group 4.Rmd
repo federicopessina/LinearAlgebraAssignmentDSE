@@ -66,18 +66,22 @@ $Ax = b$
 products <- c("glue A", "glue B", "glue C")
 resources <- c("workers", "electricity", "packaging")
 
+linear_equation1 <- c(2, 5, 1)
+linear_equation2 <- c(5, 2, 3)
+linear_equation3 <- c(8, 3, 2)
+
 ## Create matrix A of coefficients
-A <- matrix(data = c(2, 5, 1,
-                     5, 2, 3,
-                     8, 3, 2),
+A <- matrix(data = c(linear_equation1, 
+                     linear_equation2, 
+                     linear_equation3),
             nrow = 3,
             ncol = 3,
             byrow = FALSE
 )
 
 ## Set rownames = resources and colnames = glue type
-rownames(A) <- resources
-colnames(A) <- products
+rownames(A) <- products
+colnames(A) <- resources
 
 print(A)
 
@@ -104,9 +108,10 @@ Once the augmented matrix `A_a` is defined, the next step is to, by using *eleme
 
 ### Finding the Echelon Rectangular Matrix of augmented A
 
-The first element `E[1,1]` has to be non-zero. As it already is it is not needed to switch rows. Then we divide the first row `E[1,]` by 2 to turn the pivot into a 1:  
+The first element `E[1,1]` has to be non-zero. As it already is it is not needed to switch rows.
+Then we divide the first row `E[1,]` by 2 to turn the pivot into a 1:  
 
-```{r e0}
+```{r Row Operation 1}
 ## Make the first column a pivot = 1
 E <- A_a
 E[1,] <- E[1,] * 1/2
@@ -114,32 +119,27 @@ E[1,] <- E[1,] * 1/2
 print(E)
 ```
 
-Then we subtract in the second row `E[2,]` 5 times the first row `E[1,]` to eliminate the first element and we subtract in the third `E[3,]` row 1 time the first row `E[1,]`:
+Then we add -5 times the 1st row to the 2nd row `E[1,]`:
 
-```{r e1}
+```{r Row Operation 2}
 ## Eliminate the first element of the second row
 E[2,] <- E[2,] - (E[1,] * 5)
 
-## Eliminate the first element of the third row
-E[3,] <- E[3,] - E[1,]
+print(E)
+```
+
+We add -1 times the 1st row to the 3rd row: 
+
+```{r Row Operation 3}
+## Make the third pivot = 1
+E[3,] <- E[3,] + (E[1,] * -1)
 
 print(E)
 ```
 
-We convert the second pivot to 1 by diving by -10.5 and eliminate the number beneath it `E[3,2]` by subtracting to the third row `E[3,]` a half of the second row `E[2,]`: 
+We multiply the 2nd row by -2/21:
 
-```{r e2}
-## Make the second pivot = 1
-E[2,] <- E[2,] / -10.5
-
-## Eliminate the second element of the third row
-E[3,] <- E[3,] - (E[2,] * 0.5)
-
-print(E)
-```
-
-The last pivot is founded by multiplying the last row `E[3,]` by -(1/`E[3,]`):
-```{r e3}
+```{r Row Operation 4}
 ## Make the third pivot = 1
 e_1 <- 1 / E[3,3]
 
