@@ -61,14 +61,14 @@ As a result, the problem was formulated in the matrix form:
 $Ax = b$
 
 ## R code: formulation
-```{r formualtion}
+```{r Formualtion in Matrix Notation}
 ## Define the terms
 products <- c("glue A", "glue B", "glue C")
 resources <- c("workers", "electricity", "packaging")
 
-linear_equation1 <- c(2, 5, 1)
-linear_equation2 <- c(5, 2, 3)
-linear_equation3 <- c(8, 3, 2)
+linear_equation1 <- c(2.0, 5.0, 1.0)
+linear_equation2 <- c(5.0, 2.0, 3.0)
+linear_equation3 <- c(8.0, 3.0, 2.0)
 
 ## Create matrix A of coefficients
 A <- matrix(data = c(linear_equation1, 
@@ -86,7 +86,7 @@ colnames(A) <- resources
 print(A)
 
 ## Create Vector b of resources cost
-b <- c(335, 170, 115)
+b <- c(335.0, 170.0, 115.0)
 
 print(b)
 ```
@@ -108,46 +108,65 @@ Once the augmented matrix `A_a` is defined, the next step is to, by using *eleme
 
 ### Finding the Echelon Rectangular Matrix of augmented A
 
+
 The first element `E[1,1]` has to be non-zero. As it already is it is not needed to switch rows.
 Then we divide the first row `E[1,]` by 2 to turn the pivot into a 1:  
 
 ```{r Row Operation 1}
-## Make the first column a pivot = 1
+## define the augmented matrix
 E <- A_a
+
+## multiply the 1st row by 1/2
 E[1,] <- E[1,] * 1/2
 
 print(E)
 ```
 
-Then we add -5 times the 1st row to the 2nd row `E[1,]`:
+Eliminate the pivot element of the second row:
 
 ```{r Row Operation 2}
-## Eliminate the first element of the second row
+## Add -5 times the 1st row to the 2nd row
 E[2,] <- E[2,] - (E[1,] * 5)
 
 print(E)
 ```
 
-We add -1 times the 1st row to the 3rd row: 
+Eliminate the pivot element of the third row: 
 
 ```{r Row Operation 3}
-## Make the third pivot = 1
+## Add -1 times the 1st row to the 3rd row
 E[3,] <- E[3,] + (E[1,] * -1)
 
 print(E)
 ```
 
-We multiply the 2nd row by -2/21:
+Turn the pivot element of the 2nd row into a 1:
 
 ```{r Row Operation 4}
-## Make the third pivot = 1
-e_1 <- 1 / E[3,3]
-
-E[3,3] <- E[3,3] * e_1
-E[3,4] <- E[3,4] * e_1
+##  Multiply the 2nd row by -2/21
+E[2,] <- E[2,] * -2/21
 
 print(E)
 ```
+
+Turn the pivot element of the 3rd row into a 0:
+
+```{r Row Operation 5}
+## Add -1/2 times the 2nd row to the 3rd row
+E[3,] <- E[3,] + (E[2,] * -1/2)
+
+print(E)
+```
+
+Turn the pivot element of the 3rd row into a 1:
+
+```{r Row Operation 6}
+## Multiply the 3rd row by -21/59
+E[3,] <- E[3,] * -21/59
+
+print(E)
+```
+
 
 We can now say as we have at one pivot by column there are no  **free variables**. To proceed, we can write a system of equations with the values of the Echelon matrix:  
 
@@ -177,7 +196,13 @@ print(solution)
 
 ## Part C: Explanation
 
-It was proved that the problem had a solution, which is unique, represented in the vector `solution` = [10, 15, 30]. The properties of the Reduced Echelon form anticipated this result as the rightmost column was not a pivot (the prior column was `E[3,3]`) and the last row `E[3,]` was not a row of *0*, thus the **Existence and Uniqueness Theorem** was satisfied.  
+It was proved that the problem had a solution, which is unique, represented in the vector `solution` = [10, 15, 30]. The properties of the Reduced Echelon form anticipated this result as the rightmost column was not a pivot (the prior column was `E[3,3]`) and the last row `E[3,]` was not a row of *0*, thus the **Existence and Uniqueness Theorem** was satisfied.
+
+```{r Standard Library Solution Benchmark}
+library(matlib)
+echelon(A, b, reduced=FALSE, verbose=TRUE, fractions=TRUE) # row-echelon form
+```
+
 
 # Excercise Description (ii)
 
