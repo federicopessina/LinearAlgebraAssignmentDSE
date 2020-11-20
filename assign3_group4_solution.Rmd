@@ -1,0 +1,108 @@
+---
+title: "Assignment 3"
+author: "Group 4"
+output: pdf_document
+---
+
+# Instructions
+
+Consider the stochastic process of spread of an epidemics (of COVID-19, influenza, or other similar viruses) in a population composed by N individuals.
+Assume that each individual at each time step can be in one of the following 3 states:
+- S = susceptible = not infected and not immune (then s/he can be infected)
+- I = infected
+- R = removed = recovered and immune, or dead
+
+Assume also that:
+- at each time step each susceptible individual becomes infected with probability 0.08
+- each infected individual is removed with probability 0.6
+- each removed individual returns back to be susceptible with probability 0.1.
+
+Represent the evolution of the epidemics as a Markov chain and write the transition matrix.
+
+Imagine now that the number N of individuals in the population is N = 10000.
+
+If is it possible, find what will be the number of individuals in the three states S,I,R in the long run, after many time steps.
+
+# Theoretical Background
+
+
+
+# Solution
+We can approach this kind of problem as an oriented graph where:
+- nodes are the states
+- edges are the transitions between a state and another
+
+```{r The package for work with Markow Chain is downloaded as follows}
+library("markovchain")
+```
+
+
+being a stochastic markov chain:
+- all the elements are >= 0
+- the sum of rows and columns are = 1
+then we can infer which are the remaining elements of the transition matrix.
+
+```{r Initializing variables}
+N <- 10000 # where N is the numeber of individuals
+eipdemics_states <- c("S", "I", "R")
+
+# assuming as initial state the start of the epidemics phenomenon
+initial_state <- c(N, 0, 0) 
+
+# we instantiate the transition matrix directly as a markov chain data type
+by_row <- TRUE
+
+mcEpidemics <- new("markovchain", 
+                   states = eipdemics_states,
+                   transitionMatrix = matrix(
+                     data =  c(0.9, 0.08, 0.02,
+                               0.0, 0.4, 0.6,
+                               0.1, 0.54, 0.36),
+                     byrow = by_row,
+                     ncol = 3,
+                     nrow = 3),
+                   name = "Epidemics")
+# return
+mcEpidemics
+```
+
+As we have just one transition matrix, then the markov chain is homogeneous.
+It is easy to see that the chain is irreducible since all the states communicate (it is made by one communicating class only).
+
+
+```{r Obtain the transition matrix as a column vector}
+mcDf <- as(mcEpidemics, "data.frame")
+mcMatrix <- as(mcEpidemics, "matrix")
+mcNew <- as(mcDf, "markovchain")
+mcDf
+
+
+plot(mcEpidemics)
+```
+
+```{r To visualize with a graph the transition matrix}
+library(stats)
+mcIgraph <- as(mcEpidemics, "igraph")
+mcIgraph
+```
+
+```{r Steady state of transition matrix}
+steadyStates(mcEpidemics)
+```
+
+
+
+```{r How many transitions do the system need to reach the steady state?}
+ans <- initial_state
+
+step <- 0
+while (round(ans, digits = 0) != steadyStates(mcEpidemics)) { # we round values as discrete individuals are meaningless in percentage
+  ans <- ans %*% mcMatrix # need matrix data type to perform %*% operator
+  step <- step + 1
+}
+
+print(quote = FALSE, paste0("we reach the steady state in number of steps: ", step))
+```
+
+
+
