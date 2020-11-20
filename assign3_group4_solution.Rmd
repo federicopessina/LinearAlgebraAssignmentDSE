@@ -23,33 +23,40 @@ Imagine now that the number N of individuals in the population is N = 10000.
 
 If is it possible, find what will be the number of individuals in the three states S,I,R in the long run, after many time steps.
 
-# Theoretical Background
+# Solution and Theoretical Background
 
-
-
-# Solution
-We can approach this kind of problem as an oriented graph where:
-- nodes are the states
+We can approach this kind of problem interpreting the system as an oriented graph where:
+- nodes are the states of individuals
 - edges are the transitions between a state and another
+
+Our modeling assumption is that we consider the transitions as a process that verifies at each step of the process with same magnitude. In other word it's a Stationary Process.
+A process where the state of time $t_{i+1}$, given $(t_0,...,t_n)$, depends completely and only on the state of time $t_{i}$.
+Then we can use Markov Chain model as it fits with our assumptions an inputs.
 
 ```{r The package for work with Markow Chain is downloaded as follows}
 library("markovchain")
 ```
+## Construction of Inputs and Theoretical Assumptions
 
+We have the probabilities of transit from a state to another, so we try to group them in a single Transition Matrix.
+Being a stochastic Markov chain:
+- all the elements are non negative (from the property of Positivity of the probabilities $P(X)>=0$)
+- the sum of rows and columns are equal to one (derived from properties of Certainty of the probabilities $\sum_{i,j=1}^{n,m} x_i = 1$)
+Then we can infer which are the remaining transition probabilities that we do not have explicitly.
 
-being a stochastic markov chain:
-- all the elements are >= 0
-- the sum of rows and columns are = 1
-then we can infer which are the remaining elements of the transition matrix.
+In particular we assume that:
+- being a virus, the probability of becoming again susceptible (S) after being infected (I) is zero or approximately zero because of an Immunity factor - even if there are evidence against this assumption in the real world
+- all the individuals, at the beginning of the epidemic ($t_0$) phenomenon, were susceptible (not infected and not immune) as the virus didn't spread yet. Thos can help us the derive the initial probability distribution $ \mu = (\mu_S^{(0)}, \mu_I^{(0)}, \mu_R^{(0)})$ 
 
 ```{r Initializing variables}
 N <- 10000 # where N is the numeber of individuals
+
 eipdemics_states <- c("S", "I", "R")
 
-# assuming as initial state the start of the epidemics phenomenon
-initial_state <- c(N, 0, 0) 
+# assuming as initial distribution
+initial_distribution <- c(1, 0, 0) 
 
-# we instantiate the transition matrix directly as a markov chain data type
+# we instantiate the transition matrix directly as a Markov chain data type
 by_row <- TRUE
 
 mcEpidemics <- new("markovchain", 
@@ -66,7 +73,9 @@ mcEpidemics <- new("markovchain",
 mcEpidemics
 ```
 
-As we have just one transition matrix, then the markov chain is homogeneous.
+## Properties of the Markov Chain
+As we have just one transition matrix, then the Markov chain is homogeneous.
+Furthermore, it is a discrete Markov Chain, because dealing with people, individuals, talking of a person in a continuous manner does not make a lot of sense.
 It is easy to see that the chain is irreducible since all the states communicate (it is made by one communicating class only).
 
 
@@ -80,28 +89,90 @@ mcDf
 plot(mcEpidemics)
 ```
 
-```{r To visualize with a graph the transition matrix}
-library(stats)
-mcIgraph <- as(mcEpidemics, "igraph")
-mcIgraph
+## Long Term Behavior
+
+From the graph (and also from the matrix before) we can state that this is an Irreducible MC as all the states communicate one to one other.
+
+```{r}
+is.irreducible(mcEpidemics)
 ```
+and, in particular of period 1 - given the following result 
+
+```{r}
+period(mcEpidemics)
+```
+A periodic MC of period that, loosely speaking, means that  it is periodic if it can only return to itself after a fixed number of transitions $ k_i>1 $ (or multiple of $k_i$) - else it is aperiodic.
+
+This can help us to predict the asymptotic behavior of the system.
+In fact, combining both we can state that the system will reach any state in a finite number of steps. That a finite state exists for this MC.
+
+It also mean that it's distribution will settle down to a defined one, rather than fluctuating infinitely. This distribution os the following one:
 
 ```{r Steady state of transition matrix}
 steadyStates(mcEpidemics)
 ```
 
+But how many steps do we need to reach the steady state?
+We set up an algorithm to calculate this - for educational purpose:
+
+```{r}
+# TODO
+```
+
+that is proven to be right with by the following "state-of-the-art" standardized function
+```{r}
+meanAbsorptionTime(mcEpidemics) # TODO
+```
+
+
+
+```{r Algorithm to simulate a Markov Chain }
+#TODO
+
+
+###n. of simulated steps###
+nsteps<-20
+###initial distribution###
+initial_distribution <- c(1,0)
+
+x<-matrix(0,nsteps,1)
+
+###The Gothenburg weather###
+eipdemics_states <- c("S", "I", "R")
+
+
+#starting state
+# x[1]<-invtransform(initial_distribution, eipdemics_states)
+x[1] <- inverse.transform(eipdemics_states, initial_distribution)
+
+
+#evolution
+P <- mcEpidemics
+for (j in c(2:nsteps)){
+  if (x[j-1]=="r") 
+    nrow<-1 
+  else 
+    nrow<-2
+  x[j]<-invtransform(P[nrow,], eipdemics_states)
+}
+x
+table(x)/nsteps
+```
+
+
 
 
 ```{r How many transitions do the system need to reach the steady state?}
-ans <- initial_state
 
-step <- 0
-while (round(ans, digits = 0) != steadyStates(mcEpidemics)) { # we round values as discrete individuals are meaningless in percentage
-  ans <- ans %*% mcMatrix # need matrix data type to perform %*% operator
-  step <- step + 1
-}
-
-print(quote = FALSE, paste0("we reach the steady state in number of steps: ", step))
+# ans <- initial_distribution
+# 
+# step <- 0
+# while (round(ans, digits = 0) != steadyStates(mcEpidemics)) { # we round values as discrete individuals are meaningless in percentage
+#   ans <- ans %*% mcMatrix # need matrix data type to perform %*% operator
+#   step <- step + 1
+# }
+# 
+# print(quote = FALSE, paste0("we reach the steady state in number of steps: ", step))
 ```
 
 
