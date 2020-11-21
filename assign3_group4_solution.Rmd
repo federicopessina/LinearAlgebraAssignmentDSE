@@ -6,6 +6,7 @@ output: pdf_document
 
 # Instructions
 
+
 Consider the stochastic process of spread of an epidemics (of COVID-19, influenza, or other similar viruses) in a population composed by N individuals.
 Assume that each individual at each time step can be in one of the following 3 states:
 - S = susceptible = not infected and not immune (then s/he can be infected)
@@ -23,49 +24,65 @@ Imagine now that the number N of individuals in the population is N = 10000.
 
 If is it possible, find what will be the number of individuals in the three states S,I,R in the long run, after many time steps.
 
-# Solution and Theoretical Background
+
+# Solution
+
+## Hypothesis and Constraints
 
 We can approach this kind of problem interpreting the system as an oriented graph where:
 - nodes are the states of individuals
 - edges are the transitions between a state and another
 
-Our modeling assumption is that we consider the transitions as a process that verifies at each step of the process with same magnitude. In other word it's a Stationary Process.
-A process where the state of time $t_{i+1}$, given $(t_0,...,t_n)$, depends completely and only on the state of time $t_{i}$.
-Then we can use Markov Chain model as it fits with our assumptions an inputs.
+Our modeling assumption is that we consider the transitions as a process where teh distribution of the forthcoming state $X_{n+1}$ depends only on the current state $X_n$ and not on the previous ones $X_{n−1}, X_{n−2},...,X_1$.
+This implies that the conditional probabilities of each state depend only on the state immediaely before
+$ Pr(X_{n+1} = x_{n+1} |X_n = x_n )$.
 
-```{r The package for work with Markow Chain is downloaded as follows}
+The transition that verifies at each step of the process happens with same magnitude.
+
+In other word it's a Stationary Process - a process where the state of time $t_{i+1}$, given $(t_0,...,t_n)$, depends completely and only on the state of time $t_{i}$.
+
+Given all these assumptions and correspondence we can use Markov Chain model as it fits with our assumptions an inputs.
+
+```{r The package for work with Markow Chains is downloaded as follows}
 library("markovchain")
 ```
+
+
 ## Construction of Inputs and Theoretical Assumptions
 
 We have the probabilities of transit from a state to another, so we try to group them in a single Transition Matrix.
-Being a stochastic Markov chain:
-- all the elements are non negative (from the property of Positivity of the probabilities $P(X)>=0$)
-- the sum of rows and columns are equal to one (derived from properties of Certainty of the probabilities $\sum_{i,j=1}^{n,m} x_i = 1$)
+
+Being a **stochastic Markov chain**:
+- all the elements are non negative (from the property of **Positivity** of the probabilities $P(X)>=0$)
+- the sum of rows and columns are equal to one (derived from properties of **Certainty** of the probabilities $\sum_{i,j=1}^{n,m} x_i = 1$)
+
 Then we can infer which are the remaining transition probabilities that we do not have explicitly.
 
 In particular we assume that:
+
 - being a virus, the probability of becoming again susceptible (S) after being infected (I) is zero or approximately zero because of an Immunity factor - even if there are evidence against this assumption in the real world
-- all the individuals, at the beginning of the epidemic ($t_0$) phenomenon, were susceptible (not infected and not immune) as the virus didn't spread yet. Thos can help us the derive the initial probability distribution $ \mu = (\mu_S^{(0)}, \mu_I^{(0)}, \mu_R^{(0)})$ 
+
+- all the individuals, at the beginning of the epidemic ($t_0$) phenomenon, were susceptible (not infected and not immune) as the virus didn't spread yet. This characteristic can help us the derive the initial probability distribution $ \mu = (\mu_S^{(0)}, \mu_I^{(0)}, \mu_R^{(0)})$ 
+
 
 ```{r Initializing variables}
-N <- 10000 # where N is the numeber of individuals
+N <- 10000 # where N is the number of individuals
 
-eipdemics_states <- c("S", "I", "R")
+eipdemicsStates <- c("S", "I", "R")
 
 # assuming as initial distribution
-initial_distribution <- c(1, 0, 0) 
+initialDistribution <- c(1, 0, 0) 
 
 # we instantiate the transition matrix directly as a Markov chain data type
-by_row <- TRUE
+byRow <- TRUE
 
 mcEpidemics <- new("markovchain", 
-                   states = eipdemics_states,
+                   states = eipdemicsStates,
                    transitionMatrix = matrix(
                      data =  c(0.9, 0.08, 0.02,
                                0.0, 0.4, 0.6,
                                0.1, 0.54, 0.36),
-                     byrow = by_row,
+                     byrow = byRow,
                      ncol = 3,
                      nrow = 3),
                    name = "Epidemics")
@@ -73,40 +90,52 @@ mcEpidemics <- new("markovchain",
 mcEpidemics
 ```
 
-## Properties of the Markov Chain
-As we have just one transition matrix, then the Markov chain is homogeneous.
-Furthermore, it is a discrete Markov Chain, because dealing with people, individuals, talking of a person in a continuous manner does not make a lot of sense.
-It is easy to see that the chain is irreducible since all the states communicate (it is made by one communicating class only).
+Where the probability of moving from state $i$ to $j$ in $n$ steps is denoted by $p(n)ij = P r (X_n = s_j |X_0 = s_i)$
 
 
 ```{r Obtain the transition matrix as a column vector}
 mcDf <- as(mcEpidemics, "data.frame")
 mcMatrix <- as(mcEpidemics, "matrix")
 mcNew <- as(mcDf, "markovchain")
+
+# return
 mcDf
+```
 
 
+## Properties of the Markov Chain
+
+As we have just one transition matrix, then the Markov chain is **time homogeneous**.
+In other terms, $Pr (X_{n+1} = sj |X_n = s_i) = Pr(X_n = s_j |X_{n−1} = s_i)$.
+
+Furthermore, it is a **discrete** Markov Chain, because, as we're dealing with people, talking about a person in a continuous manner does not make sense.
+
+It is easy to see that the chain is **irreducible** since all the states communicate (it is made by one communicating class only).
+
+```{r}
+is.irreducible(mcEpidemics)
+```
+
+```{r Plot of the Graph}
 plot(mcEpidemics)
 ```
 
 ## Long Term Behavior
 
-From the graph (and also from the matrix before) we can state that this is an Irreducible MC as all the states communicate one to one other.
-
-```{r}
-is.irreducible(mcEpidemics)
-```
-and, in particular of period 1 - given the following result 
+A periodic MC of period that, loosely speaking, means that it can only return to itself after a fixed number of transitions $ k_i>1 $ (or multiple of $k_i$) - else it is aperiodic.
+The transition matrix is of period 1 - then it's **aperiodic**
 
 ```{r}
 period(mcEpidemics)
 ```
-A periodic MC of period that, loosely speaking, means that  it is periodic if it can only return to itself after a fixed number of transitions $ k_i>1 $ (or multiple of $k_i$) - else it is aperiodic.
+
+## Asymptotic Properties
 
 This can help us to predict the asymptotic behavior of the system.
-In fact, combining both we can state that the system will reach any state in a finite number of steps. That a finite state exists for this MC.
 
-It also mean that it's distribution will settle down to a defined one, rather than fluctuating infinitely. This distribution os the following one:
+In fact, combining both irreducibility and aperiodicity we can state that the system will reach any state in a finite number of steps. That a finite state exists for this MC.
+
+It also mean that it's distribution will settle down to a defined one, a steady state rather than fluctuating infinitely. This distribution is the following one:
 
 ```{r Steady state of transition matrix}
 steadyStates(mcEpidemics)
@@ -117,63 +146,82 @@ We set up an algorithm to calculate this - for educational purpose:
 
 ```{r}
 # TODO
-```
+steadyState <- steadyStates(mcEpidemics)
 
-that is proven to be right with by the following "state-of-the-art" standardized function
-```{r}
-meanAbsorptionTime(mcEpidemics) # TODO
-```
+steps <- 0
 
 
-
-```{r Algorithm to simulate a Markov Chain }
-#TODO
-
-
-###n. of simulated steps###
-nsteps<-20
-###initial distribution###
-initial_distribution <- c(1,0)
-
-x<-matrix(0,nsteps,1)
-
-###The Gothenburg weather###
-eipdemics_states <- c("S", "I", "R")
-
-
-#starting state
-# x[1]<-invtransform(initial_distribution, eipdemics_states)
-x[1] <- inverse.transform(eipdemics_states, initial_distribution)
-
-
-#evolution
-P <- mcEpidemics
-for (j in c(2:nsteps)){
-  if (x[j-1]=="r") 
-    nrow<-1 
-  else 
-    nrow<-2
-  x[j]<-invtransform(P[nrow,], eipdemics_states)
+while (mcEpidemics != steadyState) {
+  if (steps != 0) {
+    mcEpidemics <-  initialDistribution * mcEpidemics ^ steps
+  }
+  steps <- steps + 1
 }
-x
-table(x)/nsteps
+
+print0("to reach the steady state the system needs ", steps, " steps")
+```
+
+## Number of Individuals Asymptotically Distributed
+
+We simulate the trend of the MC after many steps
+
+```{r Asymptotical Distribution of MC}
+library(ggplot2)
+
+initState <- initialDistribution
+manySteps <- 100
+
+# Instantiate probability vectors
+P_S <- c()
+P_I <- c()
+P_R <- c()
+
+# Calculate probabilities for 100 steps.
+for(k in 1:100){
+  nsteps <- initState*mcEpidemics^k
+  P_S[k] <- nsteps[1,1]
+  P_I[k] <- nsteps[1,2]
+  P_R[k] <- nsteps[1,3]
+}
+
+# Make dataframes and merge them
+
+# S
+P_S <- as.data.frame(P_S)
+P_S$Group <- 'Susceptible'
+P_S$Iter <- 1:manySteps
+names(P_S)[1] <- 'Value'
+
+# I
+P_I <- as.data.frame(P_I)
+P_I$Group <- 'Infected'
+P_I$Iter <- 1:manySteps
+names(P_I)[1] <- 'Value'
+
+# R
+P_R <- as.data.frame(CW)
+P_R$Group <- 'Removed'
+P_R$Iter <- 1:manySteps
+names(P_R)[1] <- 'Value'
+
+# steps
+steps <- rbind(P_S,P_I,P_R)
+
+# Plot the probabilities using ggplot
+ggplot(steps, aes(x = Iter, y = Value, col = Group))+
+  geom_line() +
+  xlab('Chain Step') +
+  ylab('Probability') +
+  ggtitle(paste0(manySteps,' Steps Chain Probability Prediction', collapse = NULL)) + theme(plot.title = element_text(hjust = 0.5))
+
 ```
 
 
+# Conclusion
 
 
-```{r How many transitions do the system need to reach the steady state?}
 
-# ans <- initial_distribution
-# 
-# step <- 0
-# while (round(ans, digits = 0) != steadyStates(mcEpidemics)) { # we round values as discrete individuals are meaningless in percentage
-#   ans <- ans %*% mcMatrix # need matrix data type to perform %*% operator
-#   step <- step + 1
-# }
-# 
-# print(quote = FALSE, paste0("we reach the steady state in number of steps: ", step))
-```
+
 
 
 
