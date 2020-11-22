@@ -222,9 +222,11 @@ ggplot(steps, aes(x = Iter, y = Value, col = Group))+
 
 # Conclusion
 
+The number of individuals in each state is calculated throough the **expected value** - probability of being in a particular state times the total number of individuals
 
+$ E(X)=P(s_i)*N $
 
-
-
-
-
+```{r}
+nS_i <- round(steadyState * N)
+nS_i
+```
