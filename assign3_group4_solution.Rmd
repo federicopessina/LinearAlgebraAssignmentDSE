@@ -139,11 +139,11 @@ It also mean that it's distribution will settle down to a defined one, a steady 
 
 ```{r Steady state of transition matrix}
 steadyState <- steadyStates(mcEpidemics)
+steadyState
 ```
 
 But how many steps do we need to reach the steady state?
 We set up an algorithm to calculate this - for educational purpose:
-
 
 ```{r}
 asn <- initialDistribution * mcEpidemics
@@ -176,7 +176,7 @@ P_R <- c()
 
 # Calculate probabilities for 100 steps.
 for(k in 1:100){
-  nsteps <- initState * mcEpidemics ^ k
+  nsteps <- initState * (mcEpidemics ^ k)
   P_S[k] <- nsteps[1,1]
   P_I[k] <- nsteps[1,2]
   P_R[k] <- nsteps[1,3]
@@ -218,7 +218,7 @@ ggplot(steps, aes(x = Iter, y = Value, col = Group))+
 
 # Conclusion
 
-The number of individuals in each state is calculated throough the **expected value** - probability of being in a particular state times the total number of individuals
+The number of individuals in each state is calculated through the **expected value** - probability of being in a particular state times the total number of individuals
 
 $ E(X)=P(s_i)*N $
 
