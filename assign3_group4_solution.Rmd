@@ -81,7 +81,7 @@ mcEpidemics <- new("markovchain",
                    transitionMatrix = matrix(
                      data =  c(0.9, 0.08, 0.02,
                                0.0, 0.4, 0.6,
-                               0.1, 0.54, 0.36),
+                               0.1, 0.52, 0.38),
                      byrow = byRow,
                      ncol = 3,
                      nrow = 3),
@@ -138,29 +138,25 @@ In fact, combining both irreducibility and aperiodicity we can state that the sy
 It also mean that it's distribution will settle down to a defined one, a steady state rather than fluctuating infinitely. This distribution is the following one:
 
 ```{r Steady state of transition matrix}
-steadyStates(mcEpidemics)
+steadyState <- steadyStates(mcEpidemics)
 ```
 
 But how many steps do we need to reach the steady state?
 We set up an algorithm to calculate this - for educational purpose:
 
+
 ```{r}
-# TODO
-steadyState <- steadyStates(mcEpidemics)
+asn <- initialDistribution * mcEpidemics
 
-steps <- 100
-
-# for (i in 1:steps) {
-#   asn <- initialDistribution * mcEpidemics ^ i
-#   if (ans == ) {
-#     
-#   }
-# }
-# 
-# print("to reach the steady state the system needs steps: ", i)
-
-asn <- initialDistribution * mcEpidemics ^ 3
-ans
+for (i in 1:5) {
+  if (ans == steadyState) {
+    print(i)
+    break
+  }
+  else {
+    ans <- initialDistribution * ans
+  }
+}
 ```
 
 ## Number of Individuals Asymptotically Distributed
