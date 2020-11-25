@@ -1,7 +1,10 @@
 ---
 title: "Assignment 3"
 author: "Group 4"
-output: pdf_document
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
 ---
 
 # Instructions
@@ -140,23 +143,6 @@ It also mean that it's distribution will settle down to a defined one, a steady 
 ```{r Steady state of transition matrix}
 steadyState <- steadyStates(mcEpidemics)
 steadyState
-```
-
-But how many steps do we need to reach the steady state?
-We set up an algorithm to calculate this - for educational purpose:
-
-```{r}
-asn <- initialDistribution * mcEpidemics
-
-for (i in 1:5) {
-  if (ans == steadyState) {
-    print(i)
-    break
-  }
-  else {
-    ans <- initialDistribution * ans
-  }
-}
 ```
 
 ## Number of Individuals Asymptotically Distributed
