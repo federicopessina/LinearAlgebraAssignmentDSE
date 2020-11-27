@@ -217,5 +217,3 @@ The problem now has only 1 row, as the products are still 3 but the only issue i
 Where the coefficients of $x_1, x_2, x_3$ are the column sums of matrix `A` and vector `b` is equal to 620.  
 
 Then it is evident that the problem has infinite solutions as there are 3 variables and 1 equation, or 1 basic variables and 2 free variables.
-
-

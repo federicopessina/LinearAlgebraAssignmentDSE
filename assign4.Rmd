@@ -1,0 +1,30 @@
+---
+title: "Assignment 4"
+author: "Group 4"
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
+---
+
+# Instructions
+
+Consider the graph stored in the file graph4.gml, containing a sample of a population composed by 70 persons. 
+For each person the age, the gender, and the name (anonymised, identified by a number from 1 to 70) have been registered.
+The persons are forming the nodes of the graph and there is an (unoriented) edge between two nodes if the two persons are used to spend more than 5 hours per week together, in person or on social media, videoconference, etc.
+Identify if are there communities in the graph, and analyse if the members of each community have some common characteristics.
+Are there any hub nodes, that is any node with a particularly big number of connections to the others?
+Imagine now that a fake news spreads in the population represented by your graph, starting from one single person, that we consider ’infected by the fake news’ at time 0.
+At each time step, each non infected person vi becomes infected (that is receives the fake news) with probability
+
+P(infection of vi at time t + 1) = ( 
+0.2 : ni(t) if ni(t) ≤ 5
+1 : otherwise )
+
+where ni(t) is the number of infected neighbours of vi at time t.
+
+Are you able to simulate the spread of the fake news in the population?
+Is there any difference in the mean speed of the spread if the infection
+starts from each of the identified communities?
+
+# Solution
